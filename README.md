@@ -26,12 +26,6 @@ Generate detailed coordination reports:
 - Review individual changelog entries with full timestamps
 - Export reports to file or clipboard
 
-### Modern Interface
-- Professional WPF dialogs
-- Intuitive ribbon interface
-- Instant response times
-- Clean, organized data presentation
-
 ## Requirements
 
 | Component | Version |
