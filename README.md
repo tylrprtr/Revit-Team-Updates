@@ -230,7 +230,5 @@ This bundle structure follows Autodesk's standard plugin format and ensures comp
 
 ```
 Copyright (c) 2025 Tyler Porter
-All rights reserved.
+All rights reserved. See you, Space Cowboy...
 ```
-
-**See you Space Cowboy.**
