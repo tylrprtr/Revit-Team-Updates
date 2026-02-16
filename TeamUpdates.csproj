@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Set RevitVersion via command line: dotnet build /p:RevitVersion=2024 -->
+    <RevitVersion Condition="'$(RevitVersion)' == ''">2025</RevitVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Configurations>Debug;Release</Configurations>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <OutputPath>bin\$(Configuration)\$(RevitVersion)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <NoWarn>$(NoWarn);MSB3277;MSB3276</NoWarn>
+  </PropertyGroup>
+
+  <!-- Revit 2024: .NET Framework 4.8 -->
+  <PropertyGroup Condition="'$(RevitVersion)' == '2024'">
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Revit 2025/2026: .NET 8.0 -->
+  <PropertyGroup Condition="'$(RevitVersion)' == '2025' Or '$(RevitVersion)' == '2026'">
+    <TargetFramework>net8.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- System.ValueTuple needed for .NET Framework 4.8 (value tuple syntax in ChangelogManager) -->
+  <ItemGroup Condition="'$(RevitVersion)' == '2024'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <!-- Revit API via NuGet (no local Revit install required to build) -->
+  <ItemGroup Condition="'$(RevitVersion)' == '2024'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2024.*" IncludeAssets="compile" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2024.*" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RevitVersion)' == '2025'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.*" IncludeAssets="compile" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.*" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RevitVersion)' == '2026'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2026.*" IncludeAssets="compile" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2026.*" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="icons\**\*.png" />
+  </ItemGroup>
+
+  <!-- After build: assemble output into .bundle structure -->
+  <Target Name="CopyToBundle" AfterTargets="Build">
+    <PropertyGroup>
+      <BundleDir>$(ProjectDir)TeamUpdates.bundle\</BundleDir>
+      <BundleContentsDir>$(BundleDir)Contents\$(RevitVersion)\</BundleContentsDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(BundleContentsDir)" />
+
+    <!-- Copy built assembly and dependencies into bundle -->
+    <ItemGroup>
+      <BuildOutputFiles Include="$(TargetDir)**\*.dll" />
+      <BuildOutputFiles Include="$(TargetDir)**\*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BuildOutputFiles)" DestinationFolder="$(BundleContentsDir)" SkipUnchangedFiles="true" />
+
+    <!-- Copy .addin manifest into bundle (same for all versions) -->
+    <Copy SourceFiles="$(ProjectDir)TeamUpdates.addin" DestinationFolder="$(BundleContentsDir)" SkipUnchangedFiles="true" />
+
+    <!-- Copy PackageContents.xml to bundle root -->
+    <Copy SourceFiles="$(ProjectDir)PackageContents.xml" DestinationFolder="$(BundleDir)" SkipUnchangedFiles="true" />
+
+    <Message Text="Built TeamUpdates for Revit $(RevitVersion) → $(BundleContentsDir)" Importance="high" />
+  </Target>
+
+  <Target Name="CleanBundle" AfterTargets="Clean">
+    <RemoveDir Directories="$(ProjectDir)TeamUpdates.bundle" ContinueOnError="true" />
+  </Target>
+
+</Project>
