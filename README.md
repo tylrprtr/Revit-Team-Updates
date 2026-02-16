@@ -8,14 +8,7 @@
 
 ## 🚀 Overview
 
-Team Updates is a native C# add-in that replaces the original pyRevit extension with a faster, more reliable solution for managing team coordination in workshared Revit models. Track every sync-to-central with detailed changelogs and generate comprehensive team activity reports.
-
-**Why Choose Native C# Over pyRevit?**
-- ⚡ **10x faster** changelog operations
-- 🎯 **5-8x faster** report generation
-- 💾 **30-40% less** memory usage
-- 🛡️ **Type-safe** with compile-time error checking
-- 📦 **Easy deployment** via compiled DLL
+Team Updates is a native add-in that tracks every sync-to-central with detailed changelogs and generate comprehensive team activity reports.
 
 ## ✨ Features
 
