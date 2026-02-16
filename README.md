@@ -6,11 +6,11 @@
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20%7C%20Framework%204.8-purple.svg)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
 
-## 🚀 Overview
+## Overview
 
 Team Updates is a native add-in that tracks every sync-to-central with detailed changelogs and generate comprehensive team activity reports.
 
-## ✨ Features
+## Features
 
 ### Sync with Changelog
 Record your changes every time you sync to central:
@@ -32,7 +32,7 @@ Generate detailed coordination reports:
 - Instant response times
 - Clean, organized data presentation
 
-## 📋 Requirements
+## Requirements
 
 | Component | Version |
 |-----------|---------|
@@ -40,12 +40,12 @@ Generate detailed coordination reports:
 | **.NET** | 8.0 (for Revit 2025+) or Framework 4.8 (for Revit 2024) |
 | **Visual Studio** | 2022+ (for building) |
 
-> **📌 Framework Notes:**  
+> **Framework Notes:**  
 > - Revit 2024 uses .NET Framework 4.8
 > - Revit 2025+ uses .NET 8.0
 > - The `build-all.bat` script automatically handles the correct framework for each version
 
-## 🔧 Installation
+## Installation
 
 ### Quick Install (Recommended)
 
@@ -99,7 +99,7 @@ If you need to build for a specific version or customize the build:
 
 5. **Manually deploy** the DLL and .addin files to your preferred location
 
-## ⚙️ Setup
+## Setup
 
 ### One-Time Project Configuration
 
@@ -125,11 +125,11 @@ Every project needs a designated changelog storage location. Follow these steps 
    ```
 4. Click **OK**
 
-> **💡 Pro Tip:** This parameter is stored in the central model, so all team members automatically use the same changelog location.
+> **Pro Tip:** This parameter is stored in the central model, so all team members automatically use the same changelog location.
 
 The add-in will create a `SyncChangelogs` subfolder in this location to store all changelog entries.
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### Recording a Changelog Entry
 
@@ -175,7 +175,7 @@ SyncChangelogs/changelog_20250215_143022.json
    - **Copy to Clipboard** - Paste into emails or documents
    - **Export to File** - Save as `.txt` for records
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 TeamUpdates/
@@ -226,21 +226,11 @@ TeamUpdates.bundle/
 This bundle structure follows Autodesk's standard plugin format and ensures compatibility across multiple Revit versions.
 
 
-## 📄 License
+## License
 
 ```
 Copyright (c) 2025 Tyler Porter
 All rights reserved.
 ```
-
-This is proprietary software developed for internal use at Pivot North Architecture.
-
-## 👤 Author & Support
-
-**Tyler Porter** 
-
-For questions, issues, or feature requests, please contact the development team.
-
----
 
 **See you Space Cowboy.**
