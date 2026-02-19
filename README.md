@@ -1,14 +1,16 @@
-# Team Updates - Native Revit Add-in
+# Team Updates for Revit
 
-A native C#/.NET Revit add-in for tracking sync-to-central changes with a project changelog and generating reports for team coordination. This is a high-performance port of the original pyRevit extension.
+> A Revit add-in for tracking sync-to-central changes with team changelogs and coordination reports
 
-## Features
+[![Revit 2024-2026](https://img.shields.io/badge/Revit-2024--2026-blue.svg)](https://www.autodesk.com/products/revit/)
+[![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20%7C%20Framework%204.8-purple.svg)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
+
+## Overview
 
 - **Sync with Changelog**: Sync to central while recording a changelog entry
 - **View Changelogs**: Generate reports of team changes over time periods
 - **Multi-Version Support**: Compatible with Revit 2024, 2025, and 2026
-- **High Performance**: Native compiled code for faster execution
-- **Professional UI**: Modern WPF interfaces
 - **Cloud Model Support**: Works with both server-based and cloud-hosted models
 
 ## Requirements
@@ -94,9 +96,17 @@ TeamUpdates.bundle/
         └── TeamUpdates.dll
 ```
 
-## Project Setup
+4. **Build** (F6 or Build → Build Solution)
 
-### Create Project Parameter (One-time setup per project)
+5. **Manually deploy** the DLL and .addin files to your preferred location
+
+## Setup
+
+### One-Time Project Configuration
+
+Every project needs a designated changelog storage location. Follow these steps once per project:
+
+#### 1. Create the Project Parameter
 
 1. In Revit, go to **Manage** > **Project Parameters**
 2. Click **Add** to create a new parameter:
@@ -106,7 +116,7 @@ TeamUpdates.bundle/
    - **Categories**: Check only "Project Information"
 3. Click **OK**
 
-### Set the Project Directory Path
+#### 2. Set the Storage Path
 
 1. Go to **Manage** > **Project Information**
 2. Find the **Project Directory Filepath** parameter
@@ -116,9 +126,9 @@ TeamUpdates.bundle/
 
 This parameter is stored in the central model, so all team members automatically use the same changelog folder.
 
-## Usage
+The add-in will create a `SyncChangelogs` subfolder in this location to store all changelog entries.
 
-### Syncing with Changelog
+## Usage Guide
 
 1. Click **Sync with Changelog** in the **Sync** panel
 2. Enter your changelog description
@@ -145,6 +155,8 @@ The add-in will:
 
 ## Project Structure
 
+**File Format:**  
+Changelogs are stored as JSON files named by timestamp:
 ```
 TeamUpdates/
 ├── Commands/
@@ -185,61 +197,9 @@ Each file is named `changelog_YYYYMMDD_HHmmss.json` and contains:
 }
 ```
 
-This format is identical to the pyRevit version — all existing changelog data is immediately accessible after migration.
-
-## Troubleshooting
-
-**Add-in doesn't appear in Revit:**
-- Verify `TeamUpdates.bundle` is in `C:\ProgramData\Autodesk\ApplicationPlugins\`
-- Check that `PackageContents.xml` exists at the bundle root
-- Review Revit's journal file: `%LOCALAPPDATA%\Autodesk\Revit\Autodesk Revit 20XX\Journals`
-
-**"Project Folder Not Configured" error:**
-- Verify the `Project Directory Filepath` parameter exists in **Manage > Project Information**
-- Confirm the path is a valid UNC path (not a mapped drive letter)
-- Ensure you have write permissions to the folder
-
-**Build errors:**
-- Run `dotnet restore TeamUpdates.csproj` to restore NuGet packages
-- Use `/p:RevitVersion=XXXX` to target only the versions you need
-- See [BUILD.md](BUILD.md) for detailed troubleshooting
-
-**Sync fails:**
-- Confirm the model is workshared and you have an open local copy
-- Verify you have permission to sync to central
-- If automatic sync fails, the add-in will open Revit's native sync dialog as a fallback
-
-## Migrating from pyRevit
-
-See [MIGRATION.md](MIGRATION.md) for a full migration guide. The short version:
-
-- No data migration needed — the same JSON files are used by both versions
-- Both versions can coexist and share changelog data
-- User workflow is identical
-
-## Development
-
-### Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `Nice3point.Revit.Api.RevitAPI` | Revit API (via NuGet, no local install needed) |
-| `Nice3point.Revit.Api.RevitAPIUI` | Revit UI API (via NuGet) |
-| `Newtonsoft.Json` 13.0.3 | JSON serialization |
-| `System.ValueTuple` 4.5.0 | Value tuple support (Revit 2024 / .NET 4.8 only) |
-
-### Adding Features
-
-- **New Commands**: Add classes in `Commands/` implementing `IExternalCommand`
-- **New UI**: Add WPF windows in `UI/`
-- **New Logic**: Extend `ChangelogManager` or add new managers in `Managers/`
-- **Register Buttons**: Add `PushButtonData` entries in `Application.cs`
-
-## Support
-
-For issues or questions, contact Tyler Porter.
-
 ## License
 
-Copyright (c) 2025 Pivot North Architecture
-All rights reserved.
+```
+Copyright (c) 2025 Tyler Porter
+All rights reserved. See you, Space Cowboy...
+```
