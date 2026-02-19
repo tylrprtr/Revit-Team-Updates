@@ -40,7 +40,7 @@ namespace TeamUpdates.UI
             }
         }
 
-        private static void SetClipboardWithRetry(string text, int retries = 5)
+        private static void SetClipboardWithRetry(string text, int retries = 10)
         {
             for (int i = 0; i < retries; i++)
             {
@@ -52,7 +52,7 @@ namespace TeamUpdates.UI
                 catch (Exception)
                 {
                     if (i == retries - 1) throw;
-                    Thread.Sleep(50 * (i + 1));
+                    Thread.Sleep(100 * (1 << i)); // exponential backoff: 100, 200, 400, 800ms...
                 }
             }
         }
