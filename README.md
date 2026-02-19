@@ -6,48 +6,93 @@ A native C#/.NET Revit add-in for tracking sync-to-central changes with a projec
 
 - **Sync with Changelog**: Sync to central while recording a changelog entry
 - **View Changelogs**: Generate reports of team changes over time periods
+- **Multi-Version Support**: Compatible with Revit 2024, 2025, and 2026
 - **High Performance**: Native compiled code for faster execution
 - **Professional UI**: Modern WPF interfaces
-- **Full API Access**: Leverages complete Revit API capabilities
-
-## Benefits Over pyRevit Version
-
-- **Faster Performance**: Compiled C# code executes significantly faster than interpreted Python
-- **Better Reliability**: Type-safe code with compile-time error checking
-- **Professional Distribution**: Can be easily packaged and deployed
-- **Full .NET Integration**: Access to entire .NET ecosystem and NuGet packages
+- **Cloud Model Support**: Works with both server-based and cloud-hosted models
 
 ## Requirements
 
-- Autodesk Revit 2025
-- .NET 8.0 SDK
-- Visual Studio 2022 or later (for building from source)
+| Revit Version | .NET Framework |
+|--------------|----------------|
+| 2024 | .NET Framework 4.8 |
+| 2025 | .NET 8.0 |
+| 2026 | .NET 8.0 |
 
-**Important Note:** Revit 2025 uses .NET 8.0. If you need to target Revit 2024 or earlier, you'll need to change the target framework to `net48` (.NET Framework 4.8) in the .csproj file.
+To build from source you need:
+- .NET 8.0 SDK (for Revit 2025/2026)
+- .NET Framework 4.8 Developer Pack (for Revit 2024)
+- Visual Studio 2022 or `dotnet` CLI
+
+No local Revit installation is required to build — Revit API references are pulled automatically via NuGet.
 
 ## Installation
 
-### Option 1: Pre-built DLL (If Available)
+### Recommended: `.bundle` Deployment
 
-1. Copy `TeamUpdates.dll` to your Revit Add-ins folder:
-   - `%APPDATA%\Autodesk\Revit\Addins\2025\`
-2. Copy `TeamUpdates.addin` to the same folder
-3. Restart Revit
-4. The "Team Updates" tab will appear in the Revit ribbon
+The add-in is packaged as a Revit `.bundle`, which allows Revit to automatically load the correct version-specific DLL.
 
-### Option 2: Build from Source
-
-1. Clone or download this repository
-2. Open `TeamUpdates.csproj` in Visual Studio 2022
-3. Update the Revit API references in the .csproj file if needed:
-   ```xml
-   <Reference Include="RevitAPI">
-     <HintPath>C:\Program Files\Autodesk\Revit 2025\RevitAPI.dll</HintPath>
-   </Reference>
+1. Build the bundle (see [Building](#building) below), or obtain a pre-built `TeamUpdates.bundle` folder
+2. Copy the entire `TeamUpdates.bundle` folder to:
    ```
-4. Build the solution (F6 or Build > Build Solution)
-5. The post-build event will automatically copy files to the Revit Add-ins folder
-6. Restart Revit
+   C:\ProgramData\Autodesk\ApplicationPlugins\
+   ```
+3. Restart Revit
+4. The **Team Updates** tab will appear in the Revit ribbon
+
+Revit reads `PackageContents.xml` inside the bundle and loads the correct DLL for your Revit version automatically.
+
+### Alternative: Manual Single-Version Deployment
+
+1. Build for your target version (e.g., `dotnet build /p:RevitVersion=2025`)
+2. Copy from `TeamUpdates.bundle\Contents\2025\` to:
+   ```
+   %APPDATA%\Autodesk\Revit\Addins\2025\
+   ```
+3. Restart Revit
+
+## Building
+
+### Build All Versions at Once (Recommended)
+
+```batch
+build-all.bat
+```
+
+This builds for Revit 2024, 2025, and 2026 in a single step and assembles the output into a ready-to-deploy `TeamUpdates.bundle\` folder.
+
+### Build for a Specific Version
+
+```batch
+:: Revit 2024 (.NET Framework 4.8)
+dotnet build TeamUpdates.csproj -c Release /p:RevitVersion=2024
+
+:: Revit 2025 (.NET 8.0)
+dotnet build TeamUpdates.csproj -c Release /p:RevitVersion=2025
+
+:: Revit 2026 (.NET 8.0)
+dotnet build TeamUpdates.csproj -c Release /p:RevitVersion=2026
+```
+
+See [BUILD.md](BUILD.md) for full build and debugging instructions.
+
+### Bundle Output Structure
+
+```
+TeamUpdates.bundle/
+├── PackageContents.xml
+└── Contents/
+    ├── 2024/
+    │   ├── TeamUpdates.addin
+    │   ├── TeamUpdates.dll
+    │   └── Newtonsoft.Json.dll
+    ├── 2025/
+    │   ├── TeamUpdates.addin
+    │   └── TeamUpdates.dll
+    └── 2026/
+        ├── TeamUpdates.addin
+        └── TeamUpdates.dll
+```
 
 ## Project Setup
 
@@ -59,33 +104,34 @@ A native C#/.NET Revit add-in for tracking sync-to-central changes with a projec
    - **Type of Parameter**: Text
    - **Group parameter under**: Identity Data
    - **Categories**: Check only "Project Information"
-3. Click **OK** to create the parameter
+3. Click **OK**
 
 ### Set the Project Directory Path
 
 1. Go to **Manage** > **Project Information**
 2. Find the **Project Directory Filepath** parameter
 3. Enter the network path to your project library folder
-   - Example: `\\pnboisepfs.pivotnorthdesign.com\Sharefile\Projects\2025\25-017 Project Name\05 Drawings\01 Models\02 Project Library`
+   - Example: `\\server\share\Projects\2025\Project Name\Models`
 4. Click **OK**
 
-**Note**: This parameter is stored in the central model, so all users will automatically use the same changelog folder.
+This parameter is stored in the central model, so all team members automatically use the same changelog folder.
 
 ## Usage
 
 ### Syncing with Changelog
 
-1. Click **Sync with Changelog** in the Sync panel
-2. Enter your changelog description in the dialog
+1. Click **Sync with Changelog** in the **Sync** panel
+2. Enter your changelog description
 3. Click **Sync**
-4. The add-in will:
-   - Save your changelog entry to the network folder
-   - Automatically sync to central
-   - Display a confirmation message
+
+The add-in will:
+- Save a changelog JSON entry to the network folder
+- Automatically sync to central
+- If automatic sync fails, open Revit's native sync dialog as a fallback
 
 ### Viewing Reports
 
-1. Click **View Changelogs** in the Reports panel
+1. Click **View Changelogs** in the **Reports** panel
 2. Select a time range:
    - Last Day (24 hours)
    - Last Week (7 days)
@@ -95,8 +141,7 @@ A native C#/.NET Revit add-in for tracking sync-to-central changes with a projec
    - Central model name in the title
    - Total syncs and unique users
    - Individual changelog entries with timestamps
-4. Use **Copy to Clipboard** to share
-5. Use **Export to File** to save as .txt
+4. Use **Copy to Clipboard** or **Export to File** to save the report
 
 ## Project Structure
 
@@ -110,27 +155,28 @@ TeamUpdates/
 ├── Models/
 │   └── ChangelogEntry.cs               # Data model for changelog entries
 ├── UI/
-│   ├── ChangelogInputWindow.xaml       # Sync input dialog UI
-│   ├── ChangelogInputWindow.xaml.cs    # Sync input dialog code-behind
-│   ├── ChangelogReportWindow.xaml      # Report viewer UI
-│   ├── ChangelogReportWindow.xaml.cs   # Report viewer code-behind
-│   ├── DateRangeWindow.xaml            # Date range selector UI
-│   └── DateRangeWindow.xaml.cs         # Date range selector code-behind
+│   ├── ChangelogInputWindow.xaml(.cs)  # Sync input dialog
+│   ├── ChangelogReportWindow.xaml(.cs) # Report viewer
+│   └── DateRangeWindow.xaml(.cs)       # Date range selector
+├── icons/
+│   ├── icon-sync.png
+│   └── icon-view-changelog.png
 ├── Application.cs                       # Ribbon tab and button setup
-├── TeamUpdates.csproj                   # Project file
-├── TeamUpdates.addin                    # Revit manifest file
-└── README.md                            # This file
+├── TeamUpdates.csproj                   # Multi-version project file
+├── TeamUpdates.addin                    # Revit manifest
+├── PackageContents.xml                  # Bundle manifest
+├── TeamUpdates.sln                      # Solution file
+├── build-all.bat                        # Builds all Revit versions
+├── BUILD.md                             # Detailed build instructions
+└── MIGRATION.md                         # Migration guide from pyRevit
 ```
 
 ## Changelog Storage
 
-Changelogs are stored as JSON files in a `SyncChangelogs` subfolder within your configured project library folder. Each entry includes:
+Changelogs are stored as JSON files in a `SyncChangelogs` subfolder within your configured project library folder. The subfolder is created automatically on first sync.
 
-- `username`: Revit username
-- `timestamp`: ISO 8601 timestamp
-- `changelog`: Description text
+Each file is named `changelog_YYYYMMDD_HHmmss.json` and contains:
 
-Example JSON file (`changelog_20250215_143022.json`):
 ```json
 {
   "username": "tyler.porter",
@@ -139,70 +185,55 @@ Example JSON file (`changelog_20250215_143022.json`):
 }
 ```
 
-## Development
-
-### Building for Different Revit Versions
-
-To target a different Revit version:
-
-1. Update the `RevitAPI` and `RevitAPIUI` reference paths in `TeamUpdates.csproj`
-2. Update the addin copy destination in the post-build event
-3. Update the `TeamUpdates.addin` file's folder path
-4. Rebuild the solution
-
-### Adding Features
-
-The modular structure makes it easy to add features:
-
-- **New Commands**: Add classes in `Commands/` folder
-- **New UI**: Add WPF windows in `UI/` folder
-- **New Logic**: Extend `ChangelogManager` or create new managers
-- **New Data**: Add models in `Models/` folder
-
-### Dependencies
-
-- **Revit API**: RevitAPI.dll, RevitAPIUI.dll (provided by Revit)
-- **Newtonsoft.Json**: JSON serialization (NuGet package)
-- **.NET Framework 4.8**: Target framework
+This format is identical to the pyRevit version — all existing changelog data is immediately accessible after migration.
 
 ## Troubleshooting
 
 **Add-in doesn't appear in Revit:**
-- Check that both .dll and .addin files are in the correct folder
-- Verify the paths in the .addin file are correct
-- Check Revit's journal file for load errors
+- Verify `TeamUpdates.bundle` is in `C:\ProgramData\Autodesk\ApplicationPlugins\`
+- Check that `PackageContents.xml` exists at the bundle root
+- Review Revit's journal file: `%LOCALAPPDATA%\Autodesk\Revit\Autodesk Revit 20XX\Journals`
 
 **"Project Folder Not Configured" error:**
-- Verify the `Project Directory Filepath` parameter exists in Project Information
-- Check that the path is a valid network UNC path (not a mapped drive)
+- Verify the `Project Directory Filepath` parameter exists in **Manage > Project Information**
+- Confirm the path is a valid UNC path (not a mapped drive letter)
 - Ensure you have write permissions to the folder
 
 **Build errors:**
-- Verify Revit API reference paths in .csproj
-- Ensure .NET Framework 4.8 is installed
-- Check that all NuGet packages are restored
+- Run `dotnet restore TeamUpdates.csproj` to restore NuGet packages
+- Use `/p:RevitVersion=XXXX` to target only the versions you need
+- See [BUILD.md](BUILD.md) for detailed troubleshooting
 
 **Sync fails:**
-- Check that the model is workshared
-- Verify you have an open local copy
-- Ensure you have permissions to sync to central
+- Confirm the model is workshared and you have an open local copy
+- Verify you have permission to sync to central
+- If automatic sync fails, the add-in will open Revit's native sync dialog as a fallback
 
-## Performance Comparison
+## Migrating from pyRevit
 
-Compared to the pyRevit version:
-- **Changelog Save**: ~10x faster
-- **Report Generation**: ~5-8x faster (especially with large datasets)
-- **UI Responsiveness**: Instant loading vs. 1-2 second delay
-- **Memory Usage**: 30-40% less memory overhead
+See [MIGRATION.md](MIGRATION.md) for a full migration guide. The short version:
 
-## Version History
+- No data migration needed — the same JSON files are used by both versions
+- Both versions can coexist and share changelog data
+- User workflow is identical
 
-### Version 1.0.0
-- Initial release
-- Port from pyRevit extension to native C# add-in
-- Feature parity with original pyRevit version
-- Performance optimizations
-- Modern WPF UI
+## Development
+
+### Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `Nice3point.Revit.Api.RevitAPI` | Revit API (via NuGet, no local install needed) |
+| `Nice3point.Revit.Api.RevitAPIUI` | Revit UI API (via NuGet) |
+| `Newtonsoft.Json` 13.0.3 | JSON serialization |
+| `System.ValueTuple` 4.5.0 | Value tuple support (Revit 2024 / .NET 4.8 only) |
+
+### Adding Features
+
+- **New Commands**: Add classes in `Commands/` implementing `IExternalCommand`
+- **New UI**: Add WPF windows in `UI/`
+- **New Logic**: Extend `ChangelogManager` or add new managers in `Managers/`
+- **Register Buttons**: Add `PushButtonData` entries in `Application.cs`
 
 ## Support
 

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -24,18 +25,35 @@ namespace TeamUpdates.UI
         {
             try
             {
-                Clipboard.SetText(_reportText);
-                MessageBox.Show("Report copied to clipboard.", 
-                              "Success", 
-                              MessageBoxButton.OK, 
+                SetClipboardWithRetry(_reportText);
+                MessageBox.Show("Report copied to clipboard.",
+                              "Success",
+                              MessageBoxButton.OK,
                               MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error copying to clipboard: {ex.Message}", 
-                              "Error", 
-                              MessageBoxButton.OK, 
+                MessageBox.Show($"Error copying to clipboard: {ex.Message}",
+                              "Error",
+                              MessageBoxButton.OK,
                               MessageBoxImage.Error);
+            }
+        }
+
+        private static void SetClipboardWithRetry(string text, int retries = 5)
+        {
+            for (int i = 0; i < retries; i++)
+            {
+                try
+                {
+                    Clipboard.SetDataObject(text, true);
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (i == retries - 1) throw;
+                    Thread.Sleep(50 * (i + 1));
+                }
             }
         }
 
